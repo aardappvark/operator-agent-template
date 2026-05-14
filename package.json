@@ -1,0 +1,30 @@
+{
+  "name": "@inferlane/operator-agent-template",
+  "version": "0.1.0",
+  "description": "Reference template for InferLane Exchange operator agents. Fork, customize assess() and execute(), run as a long-lived loop.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "operator-agent": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/cli.ts",
+    "discover": "tsx src/cli.ts discover",
+    "apply": "tsx src/cli.ts apply",
+    "submit": "tsx src/cli.ts submit",
+    "loop": "tsx src/cli.ts loop",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
