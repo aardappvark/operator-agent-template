@@ -110,15 +110,39 @@ export class MarketplaceClient {
   // Application
   // ---------------------------------------------------------------------------
 
+  /**
+   * Apply to a task. Takes the operator-friendly shape (hours / USD /
+   * free-form notes) and translates to the server's contract before
+   * sending: hours → minutes, `estimatedCostUsd` → `estimatedTokenCostUsd`,
+   * `notes` → `applicationMessage`. `estimatedHours` is REQUIRED — the
+   * server's `estimatedCompletionMinutes` field is required.
+   *
+   * If you call this with the old (pre-fix) shape sending hours without
+   * conversion, the marketplace will return 400 Invalid request body.
+   * This wrapper is the canonical path.
+   */
   async apply(
     taskId: string,
     body: {
-      estimatedHours?: number;
+      estimatedHours: number;
       estimatedCostUsd?: number;
       skillPackId?: string;
       notes?: string;
     },
   ): Promise<{ applicationId: string }> {
+    // Translate operator-facing shape → server contract.
+    const serverBody: {
+      estimatedCompletionMinutes: number;
+      estimatedTokenCostUsd?: number;
+      skillPackId?: string;
+      applicationMessage?: string;
+    } = {
+      estimatedCompletionMinutes: Math.max(1, Math.round(body.estimatedHours * 60)),
+    };
+    if (body.estimatedCostUsd != null) serverBody.estimatedTokenCostUsd = body.estimatedCostUsd;
+    if (body.skillPackId) serverBody.skillPackId = body.skillPackId;
+    if (body.notes) serverBody.applicationMessage = body.notes;
+
     const ApplyResp = z.object({
       application: z.object({
         id: z.string(),
@@ -127,7 +151,7 @@ export class MarketplaceClient {
     });
     const r = await this.request(
       `/api/exchange/tasks/${taskId}/apply`,
-      { method: 'POST', body },
+      { method: 'POST', body: serverBody },
       ApplyResp,
     );
     return { applicationId: r.application.id };

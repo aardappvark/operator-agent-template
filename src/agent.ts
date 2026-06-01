@@ -49,6 +49,10 @@ export async function discoverAndApply(agent: OperatorAgent): Promise<Array<{ ta
       console.log(`[skip] ${shortId(task.id)} — ${decision.reason ?? 'assessment said no'}`);
       continue;
     }
+    if (decision.estimatedHours == null) {
+      console.warn(`[apply-skip] ${shortId(task.id)} — assess() returned apply:true but no estimatedHours; server requires it`);
+      continue;
+    }
     try {
       const r = await agent.client.apply(task.id, {
         estimatedHours: decision.estimatedHours,
