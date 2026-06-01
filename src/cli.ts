@@ -127,6 +127,9 @@ async function main(): Promise<void> {
         console.log(`Skipped: ${decision.reason ?? 'assessment said no'}`);
         return;
       }
+      if (decision.estimatedHours == null) {
+        throw new Error('assess() returned apply:true but no estimatedHours — server requires it');
+      }
       const r = await agent.client.apply(taskId, {
         estimatedHours: decision.estimatedHours,
         estimatedCostUsd: decision.estimatedCostUsd,
